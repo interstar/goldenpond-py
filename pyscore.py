@@ -59,7 +59,7 @@ class ChordSeq :
         return g()
 
     def __repr__(self) :
-        return "ChordSeq { %s }" % [x for x in self.make_iterator()]
+        return "ChordSeq { %s } (%s duration)" % ([x for x in self.make_iterator()],self.duration())
 
     def notes_waits_iterator(self) :
         return ( (xs[0].get_notes(),xs[1]) for xs in self.make_iterator() )
@@ -69,6 +69,12 @@ class ChordSeq :
 
     def fox_waits(self) :
         return [xs[1] for xs in self.make_iterator()]
+
+    def duration(self) :
+        t = 0
+        for n in self.fox_waits() :
+            t=t+n
+        return t
 
 
 class Part :
@@ -190,7 +196,7 @@ if __name__ == "__main__" :
     channel  = 0
     time     = 0   # In beats
     duration = 1   # In beats
-    tempo    = 150  # In BPM
+    tempo    = 180  # In BPM
     volume   = 100 # 0-127, as per the MIDI standard
 
     MyMIDI = MIDIFile(1) # One track, defaults to format 1 (tempo track
@@ -208,7 +214,7 @@ if __name__ == "__main__" :
             MyMIDI.addNote(track, channel, n, time, duration, volume)
         time = time + wait
 
-    cseq = csb.minor(name_to_note("C")+48, [_4,_6,_2,_5,_1], [2,2,4,4,4] )
+    cseq = csb.minor(name_to_note("C")+48, [_4,_6,_2,_2,_5,_1], [2,2,3,3,2,4] )
     print(cseq)
     
     for notes,wait in cseq.notes_waits_iterator() :
