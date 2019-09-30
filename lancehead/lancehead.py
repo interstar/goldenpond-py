@@ -54,7 +54,9 @@ class ChordSeq :
             c = 0
             while True :
                 if c >= len(self.chords) : return
-                yield (self.chords[c],self.timings[c])
+                xs = (self.chords[c],self.timings[c])
+                print(xs)
+                yield xs
                 c = c + 1
         return g()
 
@@ -156,11 +158,11 @@ class ChordSeqBuilder :
 
     def major(self,root,cs,ts) :
         sc = self.sb.major(root)
-        return ChordSeq([cb.degree_chord(sc,d) for d in cs],ts)        
+        return ChordSeq([self.cb.degree_chord(sc,d) for d in cs],ts)        
 
     def minor(self,root,cs,ts) :
         sc = self.sb.minor(root)
-        return ChordSeq([cb.degree_chord(sc,d) for d in cs],ts)
+        return ChordSeq([self.cb.degree_chord(sc,d) for d in cs],ts)
 
     def literal(self,octave,s) :
         cs = []
@@ -175,7 +177,7 @@ class ChordSeqBuilder :
                     ds.append(d)
                 print(c)
                 n = name_to_note(c) + 12 * octave
-                cc = cb.major_7th(n)
+                cc = self.cb.major_7th(n)
                 d = 1
             else :
                 d = d + 1
@@ -184,78 +186,4 @@ class ChordSeqBuilder :
         return ChordSeq(cs,ds)
 
 
-if __name__ == "__main__" :
-    from midiutil import MIDIFile
-
-    cb = ChordBuilder()
-
-    csb = ChordSeqBuilder()
-
-
-    track    = 0
-    channel  = 0
-    time     = 0   # In beats
-    duration = 1   # In beats
-    tempo    = 180  # In BPM
-    volume   = 100 # 0-127, as per the MIDI standard
-
-    MyMIDI = MIDIFile(1) # One track, defaults to format 1 (tempo track
-                         # automatically created)
-    MyMIDI.addTempo(track, time, tempo)
-
-
-    cseq = csb.major(name_to_note("C")+48, [_4,_6,_2,_5,_1], [2,2,4,4,4] )
-    print(cseq)
- 
-
-    for notes,wait in cseq.notes_waits_iterator() :
-        print(notes,wait)
-        for n in notes :
-            MyMIDI.addNote(track, channel, n, time, duration, volume)
-        time = time + wait
-
-    cseq = csb.minor(name_to_note("C")+48, [_4,_6,_2,_2,_5,_1], [2,2,3,3,2,4] )
-    print(cseq)
-    
-    for notes,wait in cseq.notes_waits_iterator() :
-        print(notes,wait)
-        for n in notes :
-            MyMIDI.addNote(track, channel, n, time, duration, volume)
-        time = time + wait
-
-    with open("test1.mid", "wb") as output_file:
-        MyMIDI.writeFile(output_file)
-
-
-
-if __name__ == "_main__" :
-
-    cb = ChordBuilder()
-    sb = ScaleBuilder()
-    print("64 major triad", cb.major_triad(64))
-    print("64 minor triad", cb.minor_triad(64))
-    print("64 major 7th ", cb.major_7th(64))
-    print("64 major 7th ", cb.minor_7th(64))
-
-    print("chords for 64 major")
-    sc = sb.major(64)
-    print(sc)
-    for d in range(1,8) :
-        print(d, sb.scale_from_scale_and_degree(sc, d))
-        print(d, cb.degree_chord(sc,d))
-
-    csb = ChordSeqBuilder()
-    cseq = csb.major(name_to_note("C"), [_4,_6,_2,_5,_1], [2,2,4,4,4] )
-    print(cseq)
-
-    cseq = csb.literal(0,"C. C#. G...")
-    print(cseq)
-
-    from FoxDot import *
-
-    print(cseq.fox_chords())
-    print(cseq.fox_waits())
-    p1 >> saw(cseq.fox_chords(),dur=cseq.fox_waits(),scale=Scale.chromatic)
-    d1 >> play("x-o-")
-    Go()
 
