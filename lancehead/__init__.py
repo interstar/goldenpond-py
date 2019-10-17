@@ -1,4 +1,5 @@
-from .lancehead import Chord, Scale, ChordSeq, ChordBuilder, ScaleBuilder, ChordSeqBuilder, ChordSeq, ScaleChooseSequence, Part, PartBuilder
+from .lancehead import Event, Chord, Scale, EventSeq, ChordBuilder, ScaleBuilder, ChordSeqBuilder
+from .lancehead import EventSeq, ScaleChooseSequence, Part, PartBuilder
 from .lancehead import LanceHead, NOTE_NAMES, DEGREE_NAMES
 
 #from typing import List
@@ -14,4 +15,3 @@ def _setup_names():
     __all__.extend(DEGREE_NAMES)
 
 _setup_names()
-

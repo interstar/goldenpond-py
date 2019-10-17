@@ -1,5 +1,4 @@
-
-from lancehead import LanceHead, Scale, Chord, ScaleBuilder, ChordBuilder, ChordSeq, ChordSeqBuilder, ScaleChooseSequence, Part, PartBuilder
+from lancehead import LanceHead, Event, Scale, Chord, ScaleBuilder, ChordBuilder, EventSeq, ChordSeqBuilder, ScaleChooseSequence, Part, PartBuilder
 
 from lancehead import _1, _2, _3, _4, _5, _6, _7
 
@@ -40,25 +39,49 @@ def test_chords() :
         assert cb.major_triad(60).choose() in [60,64,67]
 
 
+def test_events() :
+    e = Event("x",3)
+    assert type(e) == Event
+    assert e.get_data() == "x"
+    assert e.get_duration() == 3 
+
+
 def test_chord_seqs() :
     csb = ChordSeqBuilder()
-    cseq = csb.major(60, [_4,_6,_2,_5,_1],  [2,2,4,4,4] )
-    assert cseq.duration() == 16
+    seq = csb.major(60, [_4,_6,_2],  [2,2,4] )
+    assert seq.duration() == 8
 
-    nws = [(notes,waits) for notes,waits in cseq.notes_waits_iterator()]
-    assert nws == [
-([65, 69, 72], 2),
-([69, 72, 76], 2),
-([62, 65, 69], 4),
-([67, 71, 74], 4),
-([60, 64, 67], 4)]
+    events = [e for e in seq]
+    assert type(events[0]) == Event
+    assert type(events[0].get_data()) == Chord
+    notes = [e.get_data().get_notes() for e in seq]
+    assert notes == [
+[65, 69, 72],
+[69, 72, 76],
+[62, 65, 69]]
+
+    start_times = [e.get_abs_time() for e in seq]
+    assert start_times == [0,2,4]
+    
+
+    seq = seq + csb.major(60,[_5,_1], [4,4])
+    assert seq.duration() == 16
+
+    notes = [e.get_data().get_notes() for e in seq]
+    assert notes == [
+[65, 69, 72],
+[69, 72, 76],
+[62, 65, 69], 
+[67, 71, 74],
+[60, 64, 67] ]
+
+
 
 def test_scale_choose_seqs() :
     sb = ScaleBuilder()
     scale = sb.major(60)
-    scseq = ScaleChooseSequence(scale,1,8)
-    assert scseq.duration() == 8
-    nws = [(notes,waits) for notes,waits in scseq.notes_waits_iterator()]
-    for nw in nws :
-        assert nw[0][0] in scale.get_notes()
-
+    seq = ScaleChooseSequence(scale,1,8)
+    assert seq.duration() == 8
+    notes = [e.get_data().get_notes() for e in seq]
+    for n in notes :
+        assert n[0] in scale.get_notes()
