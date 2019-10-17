@@ -122,51 +122,124 @@ class LanceHead :
         return cs.swing(0.3)
 
     
-class SCBase() :
+class NoteBag() :
+    def __init__(self, notes) :
+        self.notes = notes
 
-    def get_notes(self) : return self.notes
+    def raw_notes(self) : 
+        return self.notes[:]
 
     def __getitem__(self,i) :
         return self.notes[i]
 
+    def __iter__(self) :
+        return (x for x in self.notes)
+
     def root(self) : return self.notes[0]
 
     def __add__(self,off) :
-        return Scale([n+off for n in self.notes],name)
+        return NoteBag([n+off for n in self.raw_notes()])
 
     def __sub__(self,off) :
-        return Scale([n-off for n in self.notes],name)
+        return NoteBag([n-off for n in self.raw_notes()])
 
-    def normalized_notes(self) : return [n % 12 for n in self.get_notes()]
+    def normalized_notes(self) : return NoteBag([n % 12 for n in self.raw_notes()])
 
     def named_notes(self) :
         return [LanceHead.note_to_name(x) for x in self.normalized_notes()]
 
-    def get_root(self) :
-        return self.root
+    def __len__(self) : return len(self.notes)
 
-    def get_named_root(self) :
-        return LanceHead.note_to_name(self.get_root()%12)
 
     def choose(self) :
-        return random.choice(self.get_notes())
+        return random.choice(self.raw_notes())
 
+class NBBase :
+    def undef(self,fName) :
+        raise Exception("%s needs to implement %s" % (self.__class__, fName))
+    
+    def get_notes(self) : self.undef("get_notes()")
+    def raw_notes(self) : 
+        return self.get_notes().raw_notes()
 
-class Scale(SCBase) :
+    def get_root(self) : self.undef("get_root()")
+    def choose(self) :
+        return random.choice(self.raw_notes())
+    def normalized(self) : self.undef("normalized()")
+    def __getitem__(self,i) : self.undef("__getitem__(i)")
+    def __len__(self) : 
+        return len(self.get_notes())
+
+    def named_notes(self) :
+        return self.get_notes().named_notes()
+
+    def __add__(self,o) : self.undef("__add__(o)")
+    def __sub__(self,o) : self.undef("__sub__(o)")
+
+    def test_all(self) :
+        self.get_notes()
+        self.raw_notes()
+        self.get_root()
+        self.choose()
+        self.normalized()
+        self[0]
+        len(self)
+        self.named_notes()
+        self + 3
+        self - 4
+
+      
+
+class Note(NBBase) :
+    "Just used to put individual notes into Events so that they have similar interface to Chords"
+    def __init__(self, note) :
+        assert_midinote(note)
+        self.notes = NoteBag([note])
+
+    def get_notes(self) : return self.notes
+    def raw_notes(self) : return self.notes.raw_notes()
+    def get_root(self) : return self.notes[0]
+    def choose(self) : return self.notes.choose()
+    def normalized(self) : return Note(self.notes.normalized_notes().raw_notes()[0])
+    def __getitem__(self,i) : return self.notes[i]
+    def __add__(self,n) :
+        return Note((self.get_notes()+n)[0])
+
+    def __sub__(self,n) :
+        return Note((self.get_notes()-n)[0])
+    
+    
+
+class Scale(NBBase) :
     def __init__(self,notes, root=None) :
-        self.notes = notes
+        self.notes = NoteBag(notes)
         if root == None :
             root = notes[0]
         self.root = root
 
+    def get_notes(self) : return self.notes
+    def get_root(self) :
+        return self.root
+
+    def __getitem__(self,i) : return self.notes[i]
+    
+    def __add__(self,n) :
+        return Scale(self.get_notes()+n,self.root+n)
+
+    def __sub__(self,n) :
+        return Scale(self.get_notes()-n,self.root-n)
+
     def take_elements(self,elements) :
-        return [self.notes[e] for e in elements]
+        return [self.raw_notes()[e] for e in elements]
+
+    def choose(self) :
+        return self.notes.choose()
 
     def contains(self,n) :
-        return n%12 in self.normalized_notes()
+        return n%12 in self.normalized()    
 
     def normalized(self) :
-        return Scale(self.normalized_notes())
+        return Scale(self.get_notes().normalized_notes(),self.root%12)
 
     def note_from_degree(self,degree: int) :
         return self[degree-1] # note that we treat degree as numbers 1 to 7 NOT 0 to 6
@@ -175,29 +248,43 @@ class Scale(SCBase) :
         return "Scale[root=%s]{%s}" % (self.root,["%s" % n for n in self.notes])
 
 
-class Chord(SCBase) :
+    def get_named_root(self) :
+        return LanceHead.note_to_name(self.get_root()%12)
+
+class Chord(NBBase) :
     def __init__(self,notes,root=None,name="") :
-        self.notes = notes
+        self.notes = NoteBag(notes)
         if root == None :
             root = notes[0]
         self.root = root
-
         self.name = name
 
     def get_notes(self) : return self.notes
 
-    def normalized(self) : return Chord(self.normalized_notes())
+    def named_notes(self) :
+        return self.notes.named_notes()
+
+    def choose(self) :
+        return self.notes.choose()
+    
+    def get_root(self) : return self.root
+
+    def normalized(self) : return Chord(self.get_notes().normalized_notes(),self.root%12,self.name)
+
+    def __getitem__(self,i) : return self.notes[i]
+
+    def __add__(self,n) :
+        return Chord(self.get_notes()+n,self.root+n,self.name)
+
+    def __sub__(self,n) :
+        return Chord(self.get_notes()-n,self.root-n,self.name)
 
     def __repr__(self) :
         return "Chord[%s]{%s}" % (self.get_root(),["%s" % n for n in self.notes])
 
-class Note(SCBase) :
-    "Just used to put individual notes into Events so that they have similar interface to Chords"
-    def __init__(self, note) :
-        assert_midinote(note)
-        self.note = note
 
-    def get_notes(self) : return [self.note]
+
+
 
 ## Sequences
 ##
@@ -258,6 +345,9 @@ class SeqBase :
         offs = Ring([-offset,offset])
         return EventSeq([Event(e.get_data(), e.get_duration()+offs.next()) for e in self])
 
+    def transpose(self,offset) :
+        return EventSeq([Event(e.get_data() + offset, e.get_duration()) for e in self])
+
 class EventSeq(SeqBase) :
 
     @staticmethod
@@ -268,7 +358,7 @@ class EventSeq(SeqBase) :
         self.events = events
 
     def __repr__(self) :
-        return "EvenSeq { %s } (%s duration)" % ([x for x in self.make_iterator()],self.duration())
+        return "EvenSeq { %s } (%s duration)" % ([e for e in self],self.duration())
 
     def get_events(self) :
         return self.events
@@ -284,12 +374,6 @@ class EventSeq(SeqBase) :
         return es
 
 
-class ChordSeq(EventSeq) :
-    def fox_chords(self) :
-        return [tuple(xs[0].get_notes()) for xs in self.make_iterator()]
-
-    def fox_waits(self) :
-        return [xs[1] for xs in self.make_iterator()]
     
 class ScaleChooseSequence(SeqBase) :
     def __init__(self, scale, tick, repetitions) :

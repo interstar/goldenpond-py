@@ -1,4 +1,4 @@
-from .lancehead import Event, Chord, Scale, EventSeq, ChordBuilder, ScaleBuilder, ChordSeqBuilder
+from .lancehead import Event, Note, Chord, Scale, EventSeq, ChordBuilder, ScaleBuilder, ChordSeqBuilder 
 from .lancehead import EventSeq, ScaleChooseSequence, Part, PartBuilder, Ring
 from .lancehead import LanceHead, NOTE_NAMES, DEGREE_NAMES
 
