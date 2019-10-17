@@ -107,6 +107,12 @@ class SCBase :
     def named_notes(self) : 
         return [LanceHead.note_to_name(x) for x in self.normalized_notes()]
 
+    def get_root(self) :
+        return self.root
+
+    def get_named_root(self) :
+        return LanceHead.note_to_name(self.get_root()%12)
+
 
 class Scale(SCBase) :
     def __init__(self,notes, root=None) :
@@ -128,7 +134,7 @@ class Scale(SCBase) :
         return self[degree-1] # note that we treat degree as numbers 1 to 7 NOT 0 to 6
 
     def __repr__(self) :
-        return "Scale{%s}" % ["%s" % n for n in self.notes]
+        return "Scale[root=%s]{%s}" % (self.root,["%s" % n for n in self.notes])
 
 
 class Chord(SCBase) :
@@ -145,7 +151,7 @@ class Chord(SCBase) :
     def normalized(self) : return Chord(self.normalized_notes())
 
     def __repr__(self) :
-        return "Chord[%s]{%s}" % (self.name,["%s" % n for n in self.notes])
+        return "Chord[%s]{%s}" % (self.get_root(),["%s" % n for n in self.notes])
 
 class ChordSeq :
     def __init__(self,chords,timings) :

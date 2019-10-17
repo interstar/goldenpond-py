@@ -11,6 +11,7 @@ def test_scales() :
     s1 = Scale([1,2,3])
     assert s1.contains(2) == True
     assert s1.contains(4) == False
+    assert s1.get_root() == 1
     assert s1.take_elements([2,1]) == [3,2]
     assert s1.normalized().get_notes() == [1,2,3]
     s2 = Scale([12,13,14])
@@ -21,3 +22,12 @@ def test_scales() :
     assert sb.minor(60).get_notes() == [60,62,63,65,67,68,70]
     assert sb.major(60).named_notes() == ["C","D","E","F","G","A","B"]
     assert sb.minor(60).named_notes() == ["C","D","D#","F","G","G#","A#"]
+    assert sb.major(62).get_named_root() == "D"
+
+def test_chords() :
+    cb = ChordBuilder()
+    assert cb.major_triad(60).get_notes() == [60,64,67]
+    assert cb.minor_triad(60).get_notes() == [60,63,67]
+
+    assert cb.major_7th(60).get_notes() == [60,64,67,71]
+    assert cb.minor_7th(60).get_notes() == [60,63,67,70]
