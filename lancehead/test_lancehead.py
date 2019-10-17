@@ -1,4 +1,4 @@
-from lancehead import LanceHead, Event, Scale, Chord, ScaleBuilder, ChordBuilder, EventSeq, ChordSeqBuilder, ScaleChooseSequence, Part, PartBuilder
+from lancehead import LanceHead, Event, Scale, Chord, ScaleBuilder, ChordBuilder, EventSeq, ChordSeqBuilder, ScaleChooseSequence, Part, PartBuilder, Ring
 
 from lancehead import _1, _2, _3, _4, _5, _6, _7
 
@@ -109,3 +109,18 @@ def test_scale_choose_seqs() :
     notes = [e.get_data().get_notes() for e in seq]
     for n in notes :
         assert n[0] in scale.get_notes()
+
+def test_ring() :
+    ring = Ring([1,2])
+    c = 0
+    for i in range(10) :
+        assert ring.next() == 1
+        assert ring.next() == 2
+        
+
+def test_swing() :
+    seq = EventSeq([Event(0,1)])*10
+    assert seq.duration() == 10
+    sseq = seq.swing(0.2)
+    assert sseq.duration() == 10
+    assert [e.get_duration() for e in sseq] == [0.8, 1.2, 0.8, 1.2, 0.8, 1.2, 0.8, 1.2, 0.8, 1.2] 

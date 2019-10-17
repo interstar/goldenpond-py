@@ -55,6 +55,18 @@ DEGREE_NAMES = ("_1", "_2", "_3", "_4", "_5", "_6", "_7", "i", "ii", "iii", "iv"
       "_17", "_27", "_37", "_47", "_57", "_67", "_77", "i7", "ii7", "iii7", "iv7", "v7", "vi7", "vii7",
       "I7", "II7", "III7", "IV7", "V7", "VI7", "VII7")
 
+
+__all__ = []
+
+def _setup_names():
+    g = globals()
+    # add the names to the module globals, each variable a string equal to the name
+    g.update({t: t for t in DEGREE_NAMES})
+    # add the names to __all__
+    __all__.extend(DEGREE_NAMES)
+
+_setup_names()
+
 @my_assertion
 def assert_degreename(dn) :
     assert (dn in DEGREE_NAMES)
@@ -91,7 +103,7 @@ class LanceHead :
     def example_chord_sequence() :
         """
         """
-        root = self.name_to_note("C") + 12*5
+        root = LanceHead.name_to_note("C") + 12*4
         rhyth1 = [2,2,4,4,4]
         rhyth2 = [2,2,4,2,2,4]
 
@@ -101,12 +113,13 @@ class LanceHead :
     def example_choose_sequence() :
         """
         """
+        root = LanceHead.name_to_note("C") + 12*4
         sb = ScaleBuilder()
         cs = EventSeq.null_seq()
         for i in range(8) :
-            cs = cs + ScaleChooseBuilder(sb.major(60),1,16)
-            cs = cs + ScaleChooseBuilder(sb.minor(60),1,16)
-        return cs
+            cs = cs + ScaleChooseSequence(sb.major(root+24),1,16)
+            cs = cs + ScaleChooseSequence(sb.minor(root+24),1,16)
+        return cs.swing(0.3)
 
     
 class SCBase() :
@@ -189,6 +202,19 @@ class Note(SCBase) :
 ## Sequences
 ##
 
+class Ring :
+    "Ring Buffer"
+
+    def __init__(self, xs) :
+        self.xs = xs
+        self.i = -1
+
+    def next(self) :
+        self.i=self.i+1
+        if self.i >= len(self.xs) : 
+            self.i = 0
+        return self.xs[self.i]
+
 class Event :
     def __init__(self,data,duration,at=None) :
         self.v = data
@@ -206,10 +232,36 @@ class Event :
         else :
             return self.abs_time
 
-class EventSeq :
+class SeqBase :
+    def get_events(self) :
+        raise Exception("Child class of SeqBase must implement get_events()")
+
+    def __iter__(self) :
+        def g() :
+            t = 0
+            for e in self.get_events() :
+                yield Event(e.get_data(), e.get_duration(), t)
+                t = t +  e.get_duration()
+            return
+        return g()                
+
+    def copy_events(self) :
+        return self.get_events()[:]
+
+    def duration(self) :
+        t = 0
+        for e in self :
+            t=t+e.get_duration()
+        return t
+
+    def swing(self, offset) :
+        offs = Ring([-offset,offset])
+        return EventSeq([Event(e.get_data(), e.get_duration()+offs.next()) for e in self])
+
+class EventSeq(SeqBase) :
 
     @staticmethod
-    def empty_seq() :
+    def null_seq() :
         return EventSeq([])
 
     def __init__(self,events) :
@@ -218,32 +270,19 @@ class EventSeq :
     def __repr__(self) :
         return "EvenSeq { %s } (%s duration)" % ([x for x in self.make_iterator()],self.duration())
 
-    def copy_events(self) :
-        return self.events[:]
+    def get_events(self) :
+        return self.events
 
-    def duration(self) :
-        t = 0
-        for e in self :
-            t=t+e.get_duration()
-        return t
 
     def __add__(self,other_seq) :
         return EventSeq(self.copy_events() + other_seq.copy_events())
 
     def __mul__(self,n) :
-        es = EventSeq.empty_seq()
+        es = EventSeq.null_seq()
         for i in range(n) :
             es = es + self
         return es
 
-    def __iter__(self) :
-        def g() :
-            t = 0
-            for e in self.events :
-                yield Event(e.get_data(), e.get_duration(), t)
-                t = t +  e.get_duration()
-            return
-        return g()                
 
 class ChordSeq(EventSeq) :
     def fox_chords(self) :
@@ -252,7 +291,7 @@ class ChordSeq(EventSeq) :
     def fox_waits(self) :
         return [xs[1] for xs in self.make_iterator()]
     
-class ScaleChooseSequence :
+class ScaleChooseSequence(SeqBase) :
     def __init__(self, scale, tick, repetitions) :
         self.scale = scale
         self.tick = tick
@@ -260,6 +299,10 @@ class ScaleChooseSequence :
 
     def duration(self) :
         return self.tick * self.repetitions
+
+    def get_events(self) :
+        return [x for x in self]
+
 
     def __iter__(self) :
         return (Event( Note(self.scale.choose()), self.tick) for x in range(self.repetitions))
