@@ -91,13 +91,22 @@ class LanceHead :
     def example_chord_sequence() :
         """
         """
-
         root = self.name_to_note("C") + 12*5
-        rhyth1 = [2,2,4,4,4]
+        rhyth1 = [2,2,4,4,4]60
         rhyth2 = [2,2,4,2,2,4]
 
         csb = ChordSeqBuilder()
-        return ( csb.major(root, [_4,_6,_2,_5,_1], rhyth1) + csb.minor(root, [_4,_6,_2,_5,_5,_1], rhyth2 ) ) * 8
+        return (csb.major(root, [_4,_6,_2,_5,_1], rhyth1) + csb.minor(root, [_4,_6,_2,_5,_5,_1], rhyth2 ) ) * 8
+
+    def example_choose_sequence() :
+        """
+        """
+        sb = ScaleBuilder()
+        cs = EventSeq.null_seq()
+        for i in range(8) :
+            cs = cs + ScaleChooseBuilder(sb.major(60),1,16)
+            cs = cs + ScaleChooseBuilder(sb.minor(60),1,16)
+        return cs
 
     
 class SCBase() :
@@ -198,6 +207,11 @@ class Event :
             return self.abs_time
 
 class EventSeq :
+
+    @staticmethod
+    def empty_seq() :
+        return EventSeq([])
+
     def __init__(self,events) :
         self.events = events
 
@@ -217,7 +231,7 @@ class EventSeq :
         return EventSeq(self.copy_events() + other_seq.copy_events())
 
     def __mul__(self,n) :
-        es = EventSeq([])
+        es = EventSeq.empty_seq()
         for i in range(n) :
             es = es + self
         return es
