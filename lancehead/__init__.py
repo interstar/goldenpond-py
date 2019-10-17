@@ -1,4 +1,5 @@
-from .lancehead import Chord, Scale, ChordSeq, ChordBuilder, ScaleBuilder, ChordSeqBuilder, LanceHead, NOTE_NAMES, DEGREE_NAMES
+from .lancehead import Chord, Scale, ChordSeq, ChordBuilder, ScaleBuilder, ChordSeqBuilder, ChordSeq, ScaleChooseSequence, Part, PartBuilder
+from .lancehead import LanceHead, NOTE_NAMES, DEGREE_NAMES
 
 #from typing import List
 #__all__: List[str] = []

@@ -1,5 +1,6 @@
 import traceback
 import sys
+import random
 
 # Data
 
@@ -113,6 +114,9 @@ class SCBase :
     def get_named_root(self) :
         return LanceHead.note_to_name(self.get_root()%12)
 
+    def choose(self) :
+        return random.choice(self.get_notes())
+
 
 class Scale(SCBase) :
     def __init__(self,notes, root=None) :
@@ -162,10 +166,6 @@ class ChordSeq :
         def g() :
             c = 0
             while True :
-                print("in iterator")
-                print(c)
-                print(self.chords)
-                print(len(self.chords))
                 if c >= len(self.chords) : return
                 xs = (self.chords[c],self.timings[c])
                 yield xs 
@@ -190,6 +190,18 @@ class ChordSeq :
             t=t+n
         return t
 
+
+class ScaleChooseSequence :
+    def __init__(self, scale, tick, repetitions) :
+        self.scale = scale
+        self.tick = tick
+        self.repetitions = repetitions
+
+    def duration(self) : 
+        return self.tick * self.repetitions
+
+    def notes_waits_iterator(self) :
+        return [([self.scale.choose()],self.tick) for x in range(self.repetitions) ]
 
 class Part :
     def __init__(self,sections) :
@@ -216,12 +228,8 @@ class ScaleBuilder :
         return Scale([root+e for e in elements])
 
     def scale_from_scale_and_degree(self,scale,degree) :
-        print(scale)
-        print(degree)
         degree_note = scale.note_from_degree(degree)
-        print(degree_note)
         s =  Scale( [n for n in (degree_note + x for x in range(12)) if scale.contains(n)] )
-        print(s)
         return s
 
 class ChordException(Exception) :
@@ -309,7 +317,6 @@ class ChordSeqBuilder :
         chords = []
         timings = []
         while flag :
-            print(i)            
             if i >= len(cs) :
                 return ChordSeq(chords,timings)  
             chords.append( self.cb.symbol_to_chord(sc, cs[i]))           
@@ -343,5 +350,21 @@ class ChordSeqBuilder :
         cs.append(cc)
         return ChordSeq(cs,ds)
 
+
+class PartBuilder :
+    pass
+
+class FoxBuilder :
+    def __init__(self, root) :
+        self.root = root
+        self.csb = ChordSeqBuilder()
+
+    def setRoot(self, root) : self.root = root
+
+    def newMajor(self, chords, timings= [2,2,2,2]) :
+        return self.csb.major(self.root, chords, timings)
+
+    def newMinor(self, chords, timings= [2,2,2,2]) :
+        return self.csb.minor(self.root, chords, timings)
 
 

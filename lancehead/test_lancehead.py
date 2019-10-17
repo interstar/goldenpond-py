@@ -1,5 +1,7 @@
 
-from lancehead import LanceHead, Scale, Chord, ScaleBuilder, ChordBuilder
+from lancehead import LanceHead, Scale, Chord, ScaleBuilder, ChordBuilder, ChordSeq, ChordSeqBuilder, ScaleChooseSequence, Part, PartBuilder
+
+from lancehead import _1, _2, _3, _4, _5, _6, _7
 
 def test_notes() :
     assert LanceHead.note_to_name(4) == "E"
@@ -31,3 +33,32 @@ def test_chords() :
 
     assert cb.major_7th(60).get_notes() == [60,64,67,71]
     assert cb.minor_7th(60).get_notes() == [60,63,67,70]
+
+    assert cb.minor_triad(60).named_notes() == ["C","D#","G"]
+
+    for i in range(10):
+        assert cb.major_triad(60).choose() in [60,64,67]
+
+
+def test_chord_seqs() :
+    csb = ChordSeqBuilder()
+    cseq = csb.major(60, [_4,_6,_2,_5,_1],  [2,2,4,4,4] )
+    assert cseq.duration() == 16
+
+    nws = [(notes,waits) for notes,waits in cseq.notes_waits_iterator()]
+    assert nws == [
+([65, 69, 72], 2),
+([69, 72, 76], 2),
+([62, 65, 69], 4),
+([67, 71, 74], 4),
+([60, 64, 67], 4)]
+
+def test_scale_choose_seqs() :
+    sb = ScaleBuilder()
+    scale = sb.major(60)
+    scseq = ScaleChooseSequence(scale,1,8)
+    assert scseq.duration() == 8
+    nws = [(notes,waits) for notes,waits in scseq.notes_waits_iterator()]
+    for nw in nws :
+        assert nw[0][0] in scale.get_notes()
+
