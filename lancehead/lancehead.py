@@ -92,7 +92,7 @@ class LanceHead :
         """
         """
         root = self.name_to_note("C") + 12*5
-        rhyth1 = [2,2,4,4,4]60
+        rhyth1 = [2,2,4,4,4]
         rhyth2 = [2,2,4,2,2,4]
 
         csb = ChordSeqBuilder()
