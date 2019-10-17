@@ -87,6 +87,17 @@ class LanceHead :
         assert_normalized_midinote(note)
         return ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"][note]
 
+    @staticmethod
+    def example_chord_sequence() :
+        """
+        """
+
+        root = self.name_to_note("C") + 12*5
+        rhyth1 = [2,2,4,4,4]
+        rhyth2 = [2,2,4,2,2,4]
+
+        csb = ChordSeqBuilder()
+        return ( csb.major(root, [_4,_6,_2,_5,_1], rhyth1) + csb.minor(root, [_4,_6,_2,_5,_5,_1], rhyth2 ) ) * 8
 
     
 class SCBase() :
@@ -204,6 +215,12 @@ class EventSeq :
 
     def __add__(self,other_seq) :
         return EventSeq(self.copy_events() + other_seq.copy_events())
+
+    def __mul__(self,n) :
+        es = EventSeq([])
+        for i in range(n) :
+            es = es + self
+        return es
 
     def __iter__(self) :
         def g() :
