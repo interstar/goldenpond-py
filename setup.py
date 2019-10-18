@@ -4,14 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="golden-lancehead",
+    name="goldenpond",
     version="0.0.1",
     author="Phil Jones",
     author_email="interstar@gmail.com",
     description="Musical structure generation for use in livecoding and other musical projects",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/interstar/lancehead",
+    url="https://github.com/interstar/pygoldenpond",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

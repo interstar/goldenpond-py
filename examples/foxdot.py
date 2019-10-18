@@ -1,6 +1,6 @@
 
 from lancehead import ChordBuilder, ScaleBuilder, LanceHead, ChordSeqBuilder , EventSeq
-from lancehead import _1, _2, _3, _4, _5, _6, _7, _17, _27, _37, _47, _57, _67, _77 
+from lancehead import _1, _2, _3, _4, _5, _6, _7, _17, _27, _37, _47, _57, _67, _77, I, II, III, IV, V, VI, VII, i, ii, iii, iv, v, vi, vii 
 
 
 class FoxSeq(EventSeq) :
@@ -21,6 +21,6 @@ notes = FoxSeq(LanceHead.example_choose_sequence().transpose(-60))
 from FoxDot import *
 p1 >> saw(chords.fox_chords(),dur=chords.fox_waits(),scale=Scale.chromatic)
 p2 >> pluck(notes.fox_chords(),dur=notes.fox_waits(),scale=Scale.chromatic)
-d1 >> play("x-o-")
+d1 >> play("x-o--xo-x-o--xoo")
 Go()
 

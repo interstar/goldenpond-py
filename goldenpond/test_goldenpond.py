@@ -1,12 +1,12 @@
-from lancehead import LanceHead, Event, Note, Scale, Chord, ScaleBuilder, ChordBuilder, EventSeq, ChordSeqBuilder, ScaleChooseSequence, Part, PartBuilder, Ring
+from goldenpond import GoldenPond, Event, Note, Scale, Chord, ScaleBuilder, ChordBuilder, EventSeq, ChordSeqBuilder, ScaleChooseSequence, Part, PartBuilder, Ring
 
-from lancehead import _1, _2, _3, _4, _5, _6, _7
+from goldenpond import _1, _2, _3, _4, _5, _6, _7, _17, _27, _37, _47, _57, _67, _77, I, II, III, IV, V, VI, VII, i, ii, iii, iv, v, vi, vii
 
 def test_notes() :
-    assert LanceHead.note_to_name(4) == "E"
-    assert LanceHead.name_to_note("E") == 4
-    assert LanceHead.name_to_note("F#") == 6
-    assert LanceHead.name_to_note("Eb") == 3
+    assert GoldenPond.note_to_name(4) == "E"
+    assert GoldenPond.name_to_note("E") == 4
+    assert GoldenPond.name_to_note("F#") == 6
+    assert GoldenPond.name_to_note("Eb") == 3
 
 def test_note_bag() :
     x = Scale([1,2,3])
@@ -146,3 +146,9 @@ def test_swing() :
     sseq = seq.swing(0.2)
     assert sseq.duration() == 10
     assert [e.get_duration() for e in sseq] == [0.8, 1.2, 0.8, 1.2, 0.8, 1.2, 0.8, 1.2, 0.8, 1.2] 
+
+
+def test_seq_builder() :
+    root = GoldenPond.name_to_note("C") + 12*4
+    csb = ChordSeqBuilder()
+    return csb.minor(root, [_4,vi,_27,_5,V,_1], [1,1,1,1,1,1])

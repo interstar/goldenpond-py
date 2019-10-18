@@ -1,8 +1,8 @@
 
-## Golden Lancehead : Music generation in Python
+## GoldenPond : Music generation in Python
     
 
-Golden Lancehead is a Python library for representing music.
+GoldenPond is a Python library for representing music.
 
 I've been using Sonic Pi for a couple of years, but became disappointed with way that livecoding had evolved to be more or less a tool for making very repetitive loop based music.
 

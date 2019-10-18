@@ -1,6 +1,6 @@
-from .lancehead import Event, Note, Chord, Scale, EventSeq, ChordBuilder, ScaleBuilder, ChordSeqBuilder 
-from .lancehead import EventSeq, ScaleChooseSequence, Part, PartBuilder, Ring
-from .lancehead import LanceHead, NOTE_NAMES, DEGREE_NAMES
+from .goldenpond import Event, Note, Chord, Scale, EventSeq, ChordBuilder, ScaleBuilder, ChordSeqBuilder 
+from .goldenpond import EventSeq, ScaleChooseSequence, Part, PartBuilder, Ring
+from .goldenpond import GoldenPond, NOTE_NAMES, DEGREE_NAMES
 
 #from typing import List
 #__all__: List[str] = []

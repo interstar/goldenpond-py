@@ -82,7 +82,7 @@ def assert_chord(c) :
 class NoteNotFoundException(Exception) :
     pass
 
-class LanceHead :
+class GoldenPond :
 
     @staticmethod
     def name_to_note(name) :
@@ -103,17 +103,17 @@ class LanceHead :
     def example_chord_sequence() :
         """
         """
-        root = LanceHead.name_to_note("C") + 12*4
+        root = GoldenPond.name_to_note("C") + 12*4
         rhyth1 = [2,2,4,4,4]
         rhyth2 = [2,2,4,2,2,4]
 
         csb = ChordSeqBuilder()
-        return (csb.major(root, [_4,_6,_2,_5,_1], rhyth1) + csb.minor(root, [_4,_6,_2,_5,_5,_1], rhyth2 ) ) * 8
+        return (csb.major(root, [_4,_6,_2,_5,_1], rhyth1) + csb.minor(root, [_4,_6,_2,_5,_5, _1], rhyth2 ) ) * 8
 
     def example_choose_sequence() :
         """
         """
-        root = LanceHead.name_to_note("C") + 12*4
+        root = GoldenPond.name_to_note("C") + 12*4
         sb = ScaleBuilder()
         cs = EventSeq.null_seq()
         for i in range(8) :
@@ -146,7 +146,7 @@ class NoteBag() :
     def normalized_notes(self) : return NoteBag([n % 12 for n in self.raw_notes()])
 
     def named_notes(self) :
-        return [LanceHead.note_to_name(x) for x in self.normalized_notes()]
+        return [GoldenPond.note_to_name(x) for x in self.normalized_notes()]
 
     def __len__(self) : return len(self.notes)
 
@@ -249,7 +249,7 @@ class Scale(NBBase) :
 
 
     def get_named_root(self) :
-        return LanceHead.note_to_name(self.get_root()%12)
+        return GoldenPond.note_to_name(self.get_root()%12)
 
 class Chord(NBBase) :
     def __init__(self,notes,root=None,name="") :
@@ -477,16 +477,16 @@ class ChordBuilder :
             return self.degree_chord7(scale,xs.index(symbol)+1)
         xs = ["I","II","III","IV","V","VI","VII"]
         if symbol in xs :
-            return self.major_triad(scale.root()+xs.index(symbol)+1)
+            return self.major_triad(scale.get_root()+xs.index(symbol)+1)
         xs = ["i","ii","iii","iv","v","vi","vii"]
         if symbol in xs :
-            return self.minor_triad(scale.root()+xs.index(symbol)+1)
+            return self.minor_triad(scale.get_root()+xs.index(symbol)+1)
         xs = ["I7","II7","III7","IV7","V7","VI7","VII7"]
         if symbol in xs :
-            return self.major_7th(scale.root()+xs.index(symbol)+1)
+            return self.major_7th(scale.get_root()+xs.index(symbol)+1)
         xs = ["i7","ii7","iii7","iv7","v7","vi7","vii7"]
         if symbol in xs :
-            return self.minor_7th(scale.root()+xs.index(symbol)+1)
+            return self.minor_7th(scale.get_root()+xs.index(symbol)+1)
         raise ChordSeqException("Chord %s not understood" % item)
 
 
