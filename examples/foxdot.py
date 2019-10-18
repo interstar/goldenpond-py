@@ -1,6 +1,6 @@
 
-from lancehead import ChordBuilder, ScaleBuilder, LanceHead, ChordSeqBuilder , EventSeq
-from lancehead import _1, _2, _3, _4, _5, _6, _7, _17, _27, _37, _47, _57, _67, _77, I, II, III, IV, V, VI, VII, i, ii, iii, iv, v, vi, vii 
+from goldenpond import ChordBuilder, ScaleBuilder, GoldenPond, ChordSeqBuilder , EventSeq
+from goldenpond import _1, _2, _3, _4, _5, _6, _7, _17, _27, _37, _47, _57, _67, _77, I, II, III, IV, V, VI, VII, i, ii, iii, iv, v, vi, vii 
 
 
 class FoxSeq(EventSeq) :
@@ -15,8 +15,8 @@ class FoxSeq(EventSeq) :
         return [e.get_duration() for e in self]
 
 
-chords = FoxSeq(LanceHead.example_chord_sequence().transpose(-48))
-notes = FoxSeq(LanceHead.example_choose_sequence().transpose(-60))
+chords = FoxSeq(GoldenPond.example_chord_sequence().transpose(-48))
+notes = FoxSeq(GoldenPond.example_choose_sequence().transpose(-60))
 
 from FoxDot import *
 p1 >> saw(chords.fox_chords(),dur=chords.fox_waits(),scale=Scale.chromatic)
