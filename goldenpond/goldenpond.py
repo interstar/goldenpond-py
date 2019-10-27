@@ -173,7 +173,7 @@ class NoteBag() :
 
 class NBBase :
     def undef(self,fName) :
-        raise Exception("%s needs to implement %s" % (self.__class__, fName))
+        raise GoldenPondException("%s needs to implement %s" % (self.__class__, fName))
     
     def get_notes(self) : self.undef("get_notes()")
     def raw_notes(self) : 
@@ -297,7 +297,10 @@ class Scale(NBBase) :
         events = []
         while time < total :
             d = pattern.next()
-            e = Event(Note(notes.next()), d)
+            n = 0
+            for i in range(step) :
+                n = notes.next()
+            e = Event(Note(n), d)
             time = time + d
             events.append(e)
         return EventSeq(events)
@@ -432,9 +435,10 @@ class Event :
 
     def get_data(self) : return self.v
     def get_duration(self) : return self.dur
+    def set_duration(self,d) : self.dur = d
     def get_abs_time(self) :
         if self.abs_time == None :
-            raise Exception("No absolute time available for event %s" % self)
+            raise GoldenPondException("No absolute time available for event %s" % self)
         else :
             return self.abs_time
 
@@ -449,7 +453,10 @@ class SeqBase :
                 yield Event(e.get_data(), e.get_duration(), t)
                 t = t +  e.get_duration()
             return
-        return g()                
+        return g()
+
+    def __len__(self) :
+        return len(self.get_events())
 
     def copy_events(self) :
         return self.get_events()[:]
@@ -476,6 +483,19 @@ class SeqBase :
     def get_root_seq(self) :
         return EventSeq( [Event(Note(e.get_data().get_notes()[0]), e.get_duration()) for e in self] )
         
+
+    def truncate_on(self, p_finish) :
+        events = self.copy_events()
+        build_dur = 0
+        while True :
+            e = events[-1]
+            if p_finish(e) :
+                e.set_duration(e.get_duration() + build_dur)
+                break
+            else :
+                build_dur = build_dur + e.get_duration()
+                events = events[:-1]
+        return EventSeq(events)
             
 
 

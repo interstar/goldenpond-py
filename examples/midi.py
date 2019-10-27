@@ -10,7 +10,8 @@ def example_tune_to_midi() :
     chord_seq = GoldenPond.example_chord_sequence()
     note_seq = GoldenPond.example_choose_sequence()
     root = GoldenPond.example_root()+24
-    vamped = (Scale.major(root).vamp([0.5,1,0.5,2],16) + Scale.minor(root).vamp([0.5,1,0.5,1,1],16))*8
+    def tf(e) : return e.get_data().raw_notes()[0]  == root
+    vamped = (Scale.major(root).vamp([0.5,1,0.5,2],16,2).truncate_on(tf) + Scale.minor(root).vamp([0.5,1,0.5,1,1],16,1).truncate_on(tf) )*8
     
 
     track    = 0

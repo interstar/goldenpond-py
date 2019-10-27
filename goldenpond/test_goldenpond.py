@@ -155,6 +155,16 @@ def test_seq_builder() :
     root = GoldenPond.name_to_note("C") + 12*4
     csb = ChordSeqBuilder()
     seq = csb.minor(root, [_4,vi,_27,_5,V,_1], [1,1,1,1,1,1])
+    assert seq.duration() == 6
+    assert len(seq) == 6
+
+    def test_end(e) :
+        return e.get_data().raw_notes()[0] % 12 == GoldenPond.name_to_note("G") % 12
+    seq2 = seq.truncate_on(test_end)
+    assert len(seq2) == 4
+    assert seq2.duration() == 6
+
+
 
 def test_piece() :
     piece = GoldenPond.major("G",4)
