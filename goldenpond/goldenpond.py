@@ -315,7 +315,14 @@ class Scale(NBBase) :
             time = time + d
             events.append(e)
         return EventSeq(events)
-                
+
+    def h(self) :
+        print(self.help())
+
+    def help(self) :
+        return """
+Scale %s(%s)
+""" % (self.get_named_root(), self.get_root())
     		
 
 class Chord(NBBase) :

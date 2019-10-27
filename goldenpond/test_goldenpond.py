@@ -213,4 +213,13 @@ def test_piece() :
     assert type(piece.random_notes()) == ScaleChooseSequence
     
 
+def test_help() :
+    s = Scale.major(69)
+    assert s.help() == """
+Scale A(69)
+"""
     
+    assert Scale.major(60).help() == """
+Scale C(60)
+"""
+
