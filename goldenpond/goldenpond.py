@@ -20,7 +20,7 @@ def my_assertion(f) :
 
 @my_assertion
 def assert_midinote(n) :
-    assert( type(n) == int and (-1 < n < 128))
+    assert( type(n) == int and (-128 < n < 128))
 
 @my_assertion
 def assert_normalized_midinote(n) :
@@ -99,11 +99,29 @@ class GoldenPond :
         assert_normalized_midinote(note)
         return ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"][note]
 
+
+    @classmethod
+    def major(cls,key,octave) :
+        assert_notename(key)
+        root = cls.name_to_note(key) + (12*octave)
+        return Music(key,"major",root,Scale.major(root), octave)
+
+    @classmethod
+    def minor(cls,key,octave) :
+        assert_notename(key)
+        root = cls.name_to_note(key) + (12*octave)
+        return Music(key,"minor",root,Scale.minor(root), octave)
+
+
+    @staticmethod 
+    def example_root() :
+        return GoldenPond.name_to_note("C") + 12*4
+ 
     @staticmethod
     def example_chord_sequence() :
         """
         """
-        root = GoldenPond.name_to_note("C") + 12*4
+        root = GoldenPond.example_root()
         rhyth1 = [2,2,4,4,4]
         rhyth2 = [2,2,4,2,2,4]
 
@@ -113,12 +131,11 @@ class GoldenPond :
     def example_choose_sequence() :
         """
         """
-        root = GoldenPond.name_to_note("C") + 12*4
-        sb = ScaleBuilder()
+        root = GoldenPond.example_root()
         cs = EventSeq.null_seq()
         for i in range(8) :
-            cs = cs + ScaleChooseSequence(sb.major(root+24),1,16)
-            cs = cs + ScaleChooseSequence(sb.minor(root+24),1,16)
+            cs = cs + ScaleChooseSequence(Scale.major(root+24),1,16)
+            cs = cs + ScaleChooseSequence(Scale.minor(root+24),1,16)
         return cs.swing(0.3)
 
     
@@ -211,6 +228,28 @@ class Note(NBBase) :
     
 
 class Scale(NBBase) :
+
+    @staticmethod
+    def major(root) :
+        assert_midinote(root)
+        return Scale([n + root for n in [0,2,4,5,7,9,11]])
+
+    @staticmethod
+    def minor(root) :
+        assert_midinote(root)
+        return Scale([n + root for n in [0,2,3,5,7,8,10]])
+
+    @staticmethod
+    def scale_from(root,elements) :
+        assert_midinote(root)
+        return Scale([root+e for e in elements])
+
+    @staticmethod
+    def scale_from_scale_and_degree(scale,degree) :
+        degree_note = scale.note_from_degree(degree)
+        s =  Scale( [n for n in (degree_note + x for x in range(12)) if scale.contains(n)] )
+        return s
+
     def __init__(self,notes, root=None) :
         self.notes = NoteBag(notes)
         if root == None :
@@ -247,11 +286,91 @@ class Scale(NBBase) :
     def __repr__(self) :
         return "Scale[root=%s]{%s}" % (self.root,["%s" % n for n in self.notes])
 
-
     def get_named_root(self) :
         return GoldenPond.note_to_name(self.get_root()%12)
 
+    def vamp(self, pattern, total, step=1) :
+        pattern = Ring(pattern)
+        notes = Ring(self.get_notes())
+        time = 0
+        start = 0
+        events = []
+        while time < total :
+            d = pattern.next()
+            e = Event(Note(notes.next()), d)
+            time = time + d
+            events.append(e)
+        return EventSeq(events)
+                
+    		
+
 class Chord(NBBase) :
+
+    @staticmethod
+    def chord_from_scale(scale,elements) :
+        assert_scale(scale)
+        return Chord(scale.take_elements(elements))
+
+    @staticmethod
+    def major_triad(root) :
+        assert_midinote(root)
+        return Chord.chord_from_scale(Scale.major(root),[0,2,4])
+
+    @staticmethod
+    def minor_triad(root) :
+        assert_midinote(root)
+        return Chord.chord_from_scale(Scale.minor(root),[0,2,4])
+
+    @staticmethod
+    def major_7th(root) :
+        assert_midinote(root)
+        return Chord.chord_from_scale(Scale.major(root),[0,2,4,6])
+
+    @staticmethod
+    def minor_7th(root) :
+        assert_midinote(root)
+        return Chord.chord_from_scale(Scale.minor(root),[0,2,4,6])
+
+    @staticmethod
+    def degree_chord(scale,degree) :
+        assert_scale(scale)
+        assert_degree(degree)
+        ds = Scale.scale_from_scale_and_degree(scale,degree)
+        return Chord.chord_from_scale(ds, [0,2,4])
+
+    @staticmethod
+    def degree_chord7(scale,degree) :
+        assert_scale(scale)
+        assert_degree(degree)
+        ds = Scale.scale_from_scale_and_degree(scale,degree)
+        return Chord.chord_from_scale(ds, [0,2,4,6])
+
+
+    @staticmethod
+    def symbol_to_chord(scale,symbol) :
+
+        xs = ["_1", "_2", "_3", "_4", "_5", "_6", "_7"]
+        if symbol in xs :
+            return Chord.degree_chord(scale,xs.index(symbol)+1)
+        xs = ["_17", "_27", "_37", "_47", "_57", "_67", "_77"]
+        if symbol in xs :
+            return Chord.degree_chord7(scale,xs.index(symbol)+1)
+        xs = ["I","II","III","IV","V","VI","VII"]
+        if symbol in xs :
+            return Chord.major_triad(scale.get_root()+xs.index(symbol)+1)
+        xs = ["i","ii","iii","iv","v","vi","vii"]
+        if symbol in xs :
+            return Chord.minor_triad(scale.get_root()+xs.index(symbol)+1)
+        xs = ["I7","II7","III7","IV7","V7","VI7","VII7"]
+        if symbol in xs :
+            return Chord.major_7th(scale.get_root()+xs.index(symbol)+1)
+        xs = ["i7","ii7","iii7","iv7","v7","vi7","vii7"]
+        if symbol in xs :
+            return Chord.minor_7th(scale.get_root()+xs.index(symbol)+1)
+        raise GoldenPondException("Chord %s not understood" % symbol)
+
+
+
     def __init__(self,notes,root=None,name="") :
         self.notes = NoteBag(notes)
         if root == None :
@@ -348,6 +467,18 @@ class SeqBase :
     def transpose(self,offset) :
         return EventSeq([Event(e.get_data() + offset, e.get_duration()) for e in self])
 
+    def get_notes(self) :
+        return [tuple(e.get_data().get_notes()) for e in self]
+
+    def get_durations(self) :
+        return [e.get_duration() for e in self]
+
+    def get_root_seq(self) :
+        return EventSeq( [Event(Note(e.get_data().get_notes()[0]), e.get_duration()) for e in self] )
+        
+            
+
+
 class EventSeq(SeqBase) :
 
     @staticmethod
@@ -372,6 +503,7 @@ class EventSeq(SeqBase) :
         for i in range(n) :
             es = es + self
         return es
+
 
 
     
@@ -403,126 +535,38 @@ class Piece :
 
 # Builders
 
-class ScaleBuilder :
-    def major(self,root) :
-        assert_midinote(root)
-        return Scale([n + root for n in [0,2,4,5,7,9,11]])
 
-    def minor(self,root) :
-        assert_midinote(root)
-        return Scale([n + root for n in [0,2,3,5,7,8,10]])
-
-    def scale_from(self,root,elements) :
-        assert_midinote(root)
-        return Scale([root+e for e in elements])
-
-    def scale_from_scale_and_degree(self,scale,degree) :
-        degree_note = scale.note_from_degree(degree)
-        s =  Scale( [n for n in (degree_note + x for x in range(12)) if scale.contains(n)] )
-        return s
-
-class ChordException(Exception) :
+class GoldenPondException(Exception) :
     pass
 
 
-class ChordBuilder :
-    def __init__(self) :
-        self.sb = ScaleBuilder()
-
-    def chord_from_scale(self,scale,elements) :
-        assert_scale(scale)
-        return Chord(scale.take_elements(elements))
-
-
-    def major_triad(self,root) :
-        assert_midinote(root)
-        return self.chord_from_scale(self.sb.major(root),[0,2,4])
-
-
-    def minor_triad(self,root) :
-        assert_midinote(root)
-        return self.chord_from_scale(self.sb.minor(root),[0,2,4])
-
-
-    def major_7th(self,root) :
-        assert_midinote(root)
-        return self.chord_from_scale(self.sb.major(root),[0,2,4,6])
-
-
-    def minor_7th(self,root) :
-        assert_midinote(root)
-        return self.chord_from_scale(self.sb.minor(root),[0,2,4,6])
-
-
-    def degree_chord(self,scale,degree) :
-        assert_scale(scale)
-        assert_degree(degree)
-        ds = self.sb.scale_from_scale_and_degree(scale,degree)
-        return self.chord_from_scale(ds, [0,2,4])
-
-    def degree_chord7(self,scale,degree) :
-        assert_scale(scale)
-        assert_degree(degree)
-        ds = self.sb.scale_from_scale_and_degree(scale,degree)
-        return self.chord_from_scale(ds, [0,2,4,6])
-
-
-    def symbol_to_chord(self,scale,symbol) :
-
-        xs = ["_1", "_2", "_3", "_4", "_5", "_6", "_7"]
-        if symbol in xs :
-            return self.degree_chord(scale,xs.index(symbol)+1)
-        xs = ["_17", "_27", "_37", "_47", "_57", "_67", "_77"]
-        if symbol in xs :
-            return self.degree_chord7(scale,xs.index(symbol)+1)
-        xs = ["I","II","III","IV","V","VI","VII"]
-        if symbol in xs :
-            return self.major_triad(scale.get_root()+xs.index(symbol)+1)
-        xs = ["i","ii","iii","iv","v","vi","vii"]
-        if symbol in xs :
-            return self.minor_triad(scale.get_root()+xs.index(symbol)+1)
-        xs = ["I7","II7","III7","IV7","V7","VI7","VII7"]
-        if symbol in xs :
-            return self.major_7th(scale.get_root()+xs.index(symbol)+1)
-        xs = ["i7","ii7","iii7","iv7","v7","vi7","vii7"]
-        if symbol in xs :
-            return self.minor_7th(scale.get_root()+xs.index(symbol)+1)
-        raise ChordSeqException("Chord %s not understood" % item)
-
 
 class ChordSeqBuilder :
-    def __init__(self) :
-        self.cb = ChordBuilder()
-        self.sb = ScaleBuilder()
 
     def chordseq(self,sc,root,cs,ts) :
         assert_scale(sc)
         assert_midinote(root)
 
         if len(cs) != len(ts) :
-            raise ChordException("Chord list and time list different lengths")
+            raise GoldenPondException("Chord list and time list different lengths")
         i = 0
         flag = True
         events = []
         while flag :
             if i >= len(cs) :
                 return EventSeq(events)
-            data = self.cb.symbol_to_chord(sc, cs[i])
+            data = Chord.symbol_to_chord(sc, cs[i])
             duration = ts[i]
             events.append(Event(data,duration))
             i=i+1
 
     def major(self,root,cs,ts) :
-        return self.chordseq(self.sb.major(root), root, cs, ts)
+        return self.chordseq(Scale.major(root), root, cs, ts)
 
     def minor(self,root,cs,ts) :
-        return self.chordseq(self.sb.minor(root), root, cs, ts)
+        return self.chordseq(Scale.minor(root), root, cs, ts)
 
 
-
-
-class PartBuilder :
-    pass
 
 class FoxBuilder :
     def __init__(self, root) :
@@ -536,3 +580,68 @@ class FoxBuilder :
 
     def newMinor(self, chords, timings= [2,2,2,2]) :
         return self.csb.minor(self.root, chords, timings)
+
+
+
+class Music :
+
+    def __init__(self,key="C",mode="major", root=60,mode_scale=None, octave=4) :
+        assert_notename(key)
+        self.key = key
+        self.octave = octave
+        self.root = root
+        self.mode = mode
+        self.mode_scale = mode_scale
+        self.tracks = [EventSeq([])]
+        self.current_default = 0
+        self.csb = ChordSeqBuilder()
+
+    def get_key(self) : return self.key
+
+    def get_root(self) : return self.root
+
+    def get_mode(self) : return self.mode
+
+    def no_tracks(self) : return len(self.tracks)
+    
+    def duration(self) :
+        return self.tracks[0].duration()
+    
+    def current_default_track(self) :
+        return self.current_default
+
+    def add(self,chords,timings) :
+        if self.mode == "major" :
+            newseq = self.csb.major(self.root, chords, timings)
+        else :
+            newseq = self.csb.minor(self.root, chords, timings)
+
+        self.tracks[self.current_default] = self.tracks[self.current_default] + newseq
+        return self
+
+    def add_seq(self,events) :
+        self.tracks[self.current_default] = self.tracks[self.current_default] + events
+
+    def new_track(self) :
+        self.tracks.append(EventSeq([]))
+        return self
+
+    def track(self,i) :
+        if i >= len(self.tracks) : 
+            raise Exception("Tried to set track number %s but only have %s tracks" % (i,self.no_tracks()))
+        self.current_default = i
+        return self
+
+    def get_track(self, i) :
+        return self.tracks[i]
+
+    def get_notes_for_track(self, i) :
+        return self.tracks[i].get_notes()
+
+    def get_durations_for_track(self,i) :
+        return self.tracks[i].get_durations()
+
+    def random_notes(self) :
+        return ScaleChooseSequence(self.mode_scale, 1, self.duration())
+
+    
