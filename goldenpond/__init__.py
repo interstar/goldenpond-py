@@ -1,4 +1,4 @@
-from .goldenpond import Event, Note, Chord, Scale, EventSeq, ChordSeqBuilder 
+from .goldenpond import Event, Note, NoteBag,Chord, Scale, EventSeq, ChordSeqBuilder 
 from .goldenpond import EventSeq, ScaleChooseSequence, Music, Ring
 from .goldenpond import GoldenPond, NOTE_NAMES, DEGREE_NAMES
 

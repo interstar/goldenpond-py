@@ -171,6 +171,12 @@ class NoteBag() :
     def choose(self) :
         return random.choice(self.raw_notes())
 
+    def concat(self, other_notebag) :
+        newnotes = self.raw_notes()
+        for n in other_notebag :
+            newnotes.append(n)
+        return NoteBag(newnotes)
+
 class NBBase :
     def undef(self,fName) :
         raise GoldenPondException("%s needs to implement %s" % (self.__class__, fName))
@@ -288,7 +294,12 @@ class Scale(NBBase) :
 
     def get_named_root(self) :
         return GoldenPond.note_to_name(self.get_root()%12)
-
+        
+    def double_up(self) :
+        notes = self.get_notes()
+        return Scale(notes.concat( self.get_notes() + 12 ))
+                
+    
     def vamp(self, pattern, total, step=1) :
         pattern = Ring(pattern)
         notes = Ring(self.get_notes())

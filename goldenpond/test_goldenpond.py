@@ -1,4 +1,4 @@
-from goldenpond import GoldenPond, Event, Note, Scale, Chord, EventSeq, ChordSeqBuilder, ScaleChooseSequence, Music, Ring
+from goldenpond import GoldenPond, Event, Note, NoteBag, Scale, Chord, EventSeq, ChordSeqBuilder, ScaleChooseSequence, Music, Ring
 
 from goldenpond import _1, _2, _3, _4, _5, _6, _7, _17, _27, _37, _47, _57, _67, _77, I, II, III, IV, V, VI, VII, i, ii, iii, iv, v, vi, vii
 
@@ -17,6 +17,19 @@ def test_note_bag() :
     x.test_all()
     
     assert x.normalized()[0] == 1
+
+    nb = NoteBag([1,2,3])
+    nb2 = nb.concat(NoteBag([4,5,6]))
+    assert len(nb2) == 6
+    assert nb2.raw_notes() == [1,2,3,4,5,6]
+
+    x = Scale.major(60)
+    assert len(x.get_notes()) == 7
+
+    y = x.double_up()
+    assert len(y.get_notes())==14
+    assert y.raw_notes() == [60,62,64,65,67,69,71, 72,74,76,77,79,81,83]
+       
 
 def test_scales() :
     s1 = Scale([1,2,3])
