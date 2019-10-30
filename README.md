@@ -27,6 +27,8 @@ git clone https://github.com/interstar/goldenpond-py.git goldenpond
 
 cd goldenpond/examples
 
+ln -s ../goldenpond goldenpond
+
 python3 midi.py
 
 

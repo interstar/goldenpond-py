@@ -23,7 +23,7 @@ p1 >> saw(piece.get_notes_for_track(0), dur=piece.get_durations_for_track(0), sc
 p2 >> pluck(piece.get_notes_for_track(1), dur=piece.get_durations_for_track(1), scale=Scale.chromatic)
 p3 >> blip(piece.get_notes_for_track(2), dur=piece.get_durations_for_track(2), scale=Scale.chromatic)
 # add a simple drum pattern
-d1 >> play("x-o-x-o-")
+d1 >> play("x-o-x-o-x-o-xxo-")
 # and go ...
 Go()
 
