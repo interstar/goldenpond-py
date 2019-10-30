@@ -34,11 +34,11 @@ def example1() :
     for i in range(8) :
         cs = cs + ScaleChooseSequence(Scale.major(root+24),1,16)
         cs = cs + ScaleChooseSequence(Scale.minor(root+24),1,16)
-    note_seq = cs.swing(0.5 )
+    note_seq = cs.swing(0.3 )
     
     def tf(e) : return e.get_data().raw_notes()[0] % 12  == root % 12   
     vamped = (Scale.major(root).double_up().vamp([0.5,1,0.5,2],16,2).truncate_on(tf).transpose(12) + Scale.minor(root).double_up().vamp([0.5,1,0.5,1,1],16,1).truncate_on(tf).transpose(24) )*8
     
-    midify("example1.mid", 160, 1, 100, [chord_seq, vamped])
+    midify("example1.mid", 180, 1, 100, [chord_seq, note_seq])
 
 example1()
