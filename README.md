@@ -4,7 +4,7 @@
 
 GoldenPond is a Python library for representing music.
 
-I've been using Sonic Pi for a couple of years, but became disappointed with way that livecoding had evolved to be more or less a tool for making very repetitive loop based music.
+I've been using Sonic Pi for a couple of years, but became disappointed with the way that livecoding had evolved to be more or less a tool for making very repetitive loop based music.
 
 Given the expressivity of a programming lanaguge, why am I basically using it to represent simple grid based sequencers? When I could be expressing far more complex musical structures in elegant code?
 
