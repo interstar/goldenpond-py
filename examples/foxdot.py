@@ -12,7 +12,7 @@ bass_seq = piece.get_track(0).get_root_seq().transpose(-24)
 # and create a new track in the piece to store it
 piece.new_track().track(1).add_seq(bass_seq)
 # then create a vamp on an A major scale
-vamped = Scale.major(21).vamp([0.5,0.25,0.5,0.25,0.5],16,2)
+vamped = Scale.major(21).vamp([0.5,0.25,0.5,0.25,0.5],16,2).transpose(-12)
 # and store it in a third track
 piece.new_track().track(2).add_seq(vamped)
 
