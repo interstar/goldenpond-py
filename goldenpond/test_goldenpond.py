@@ -212,6 +212,11 @@ def test_piece() :
 
     assert type(piece.random_notes()) == ScaleChooseSequence
     
+def test_modes() :
+    modes = GoldenPond.modes()
+    assert modes["ionian"].all_names() == set(["ionian","major"])
+    assert modes["dorian"].all_names() == set(["dorian"])
+    assert modes["phrygian"].all_names() == set(["phrygian"]) 
 
 def test_help() :
     s = Scale.major(69)

@@ -128,6 +128,7 @@ class GoldenPond :
         csb = ChordSeqBuilder()
         return (csb.major(root, [_4,_6,_2,_5,_1], rhyth1) + csb.minor(root, [_4,_6,_2,_5,_5, _1], rhyth2 ) ) * 8
 
+    @staticmethod
     def example_choose_sequence() :
         """
         """
@@ -138,6 +139,17 @@ class GoldenPond :
             cs = cs + ScaleChooseSequence(Scale.minor(root+24),1,16)
         return cs.swing(0.3)
 
+    
+
+    @staticmethod
+    def modes() :
+        modes = {
+            "ionian" : Mode(["ionian","major"]),
+            "dorian" : Mode(["dorian"]),
+            "phrygian" : Mode(["phrygian"]) 
+        }
+        return modes
+    
     
 class NoteBag() :
     def __init__(self, notes) :
@@ -682,4 +694,10 @@ class Music :
     def random_notes(self) :
         return ScaleChooseSequence(self.mode_scale, 1, self.duration())
 
-    
+
+class Mode :
+    def __init__(self, names) :
+        self.names = set(names)
+
+    def all_names(self) :
+        return self.names    
