@@ -199,7 +199,9 @@ def test_piece() :
     assert p2.current_default_track() == 0    
     p2.track(1)
     assert p2.current_default_track() == 1
-    
+    y an intro "bpm 120 "for 1 minute,and now that's all you want.
+Or whatever you want,delete intro^^
+hugs xx
     t = piece.get_track(0)
     assert type(t) == EventSeq
 
@@ -228,3 +230,7 @@ Scale A(69)
 Scale C(60)
 """
 
+def test_describe() :
+    "A help / describe object for all things"    
+    pass
+    
