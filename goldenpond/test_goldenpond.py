@@ -242,6 +242,16 @@ def test_modes() :
     assert Mode.make(88,5).type() == "minor"
     assert Mode.make(45,6).type() == "diminished"
 
+    assert m.degtriad(1).raw_notes() == [60,64,67]
+    assert m.degtriad(2).raw_notes() == [62,65,69]
+    assert m.degtriad(3).raw_notes() == [64,67,71]
+    assert m.degtriad(4).raw_notes() == [65,69,60]
+    assert m.degtriad(5).raw_notes() == [67,71,62]
+    assert m.degtriad(6).raw_notes() == [69,60,64]
+    assert m.degtriad(7).raw_notes() == [71,62,65]
+
+    assert m.deg7th(1).raw_notes() == [60,64,67,71]
+    assert m.deg7th(4).raw_notes() == [65,69,60,64]
 
 def test_help() :
     s = Scale.major(69)

@@ -780,3 +780,13 @@ class Mode :
 
     def type(self) :
         return Mode.mode_types[tuple(self.diffs())]
+
+    def degtriad(self,d) :          
+        nps = [d-1,(d+1)%7,(d+3)%7]
+        return Chord.chord_from_scale(self.to_scale(),nps)
+        
+    def deg7th(self,d) :
+        nps = [d-1,(d+1)%7,(d+3)%7,(d+5)%7]
+        return Chord.chord_from_scale(self.to_scale(),nps)
+
+
