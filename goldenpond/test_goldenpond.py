@@ -1,4 +1,4 @@
-from goldenpond import GoldenPond, Event, Note, NoteBag, Scale, Chord, EventSeq, ChordSeqBuilder, ScaleChooseSequence, Music, Ring
+from goldenpond import GoldenPond, Event, Note, NoteBag, Scale, Chord, EventSeq, ChordSeqBuilder, ScaleChooseSequence, Music, Ring, Mode 
 
 from goldenpond import _1, _2, _3, _4, _5, _6, _7, _17, _27, _37, _47, _57, _67, _77, I, II, III, IV, V, VI, VII, i, ii, iii, iv, v, vi, vii
 
@@ -7,6 +7,8 @@ def test_notes() :
     assert GoldenPond.name_to_note("E") == 4
     assert GoldenPond.name_to_note("F#") == 6
     assert GoldenPond.name_to_note("Eb") == 3
+
+    assert GoldenPond.midi_to_key_and_octave(64) == ("E", 4)
 
 def test_note_bag() :
     x = Scale([1,2,3])
@@ -199,9 +201,6 @@ def test_piece() :
     assert p2.current_default_track() == 0    
     p2.track(1)
     assert p2.current_default_track() == 1
-    y an intro "bpm 120 "for 1 minute,and now that's all you want.
-Or whatever you want,delete intro^^
-hugs xx
     t = piece.get_track(0)
     assert type(t) == EventSeq
 
@@ -215,10 +214,34 @@ hugs xx
     assert type(piece.random_notes()) == ScaleChooseSequence
     
 def test_modes() :
-    modes = GoldenPond.modes()
-    assert modes["ionian"].all_names() == set(["ionian","major"])
-    assert modes["dorian"].all_names() == set(["dorian"])
-    assert modes["phrygian"].all_names() == set(["phrygian"]) 
+    m = Mode.start(60)
+    assert m.raw_notes() == [60,62,64,65,67,69,71] 
+    assert m.diffs() == [2,2,1,2,2,2,1]
+    assert m.names() == ["ionian","major"]
+
+    n = m.remode(3)
+    assert n.diffs() == [2,2,2,1,2,2,1]
+    assert n.raw_notes() == [60,62,64,66,67,69,71]
+    assert n.names() == ["lydian"]
+
+    o = m.remode(5)
+    assert o.diffs() == [2,1,2,2,1,2,2]
+    assert o.raw_notes() == [60,62,63,65,67,68,70] 
+    assert o.names() == ["aeolian", "natural minor"]
+
+    p = Mode.make(60,4)
+    assert p.names() == ["mixolydian"]
+    
+    assert Mode.make(60,0).names() == ["ionian","major"]
+    assert Mode.make(63,0).type() == "major"
+    assert Mode.make(11,1).names() == ["dorian"]
+    assert Mode.make(12,1).type() == "minor"
+    assert Mode.make(52,2).type() == "minor"
+    assert Mode.make(51,3).type() == "major"
+    assert Mode.make(66,4).type() == "major"
+    assert Mode.make(88,5).type() == "minor"
+    assert Mode.make(45,6).type() == "diminished"
+
 
 def test_help() :
     s = Scale.major(69)

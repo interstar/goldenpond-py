@@ -99,6 +99,9 @@ class GoldenPond :
         assert_normalized_midinote(note)
         return ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"][note]
 
+    @staticmethod
+    def midi_to_key_and_octave(midi_note) :
+        return (GoldenPond.note_to_name(midi_note%12), -1+(int)(midi_note/12))
 
     @classmethod
     def major(cls,key,octave) :
@@ -141,15 +144,7 @@ class GoldenPond :
 
     
 
-    @staticmethod
-    def modes() :
-        modes = {
-            "ionian" : Mode(["ionian","major"]),
-            "dorian" : Mode(["dorian"]),
-            "phrygian" : Mode(["phrygian"]) 
-        }
-        return modes
-    
+
     
 class NoteBag() :
     def __init__(self, notes) :
@@ -353,6 +348,11 @@ class Chord(NBBase) :
     def minor_triad(root) :
         assert_midinote(root)
         return Chord.chord_from_scale(Scale.minor(root),[0,2,4])
+
+    @staticmethod
+    def power_chord(root) :
+        assert_midinote(root)
+        return Chord.chord_from_scale(Scale.major(root),[0,4])
 
     @staticmethod
     def major_7th(root) :
@@ -616,7 +616,21 @@ class ChordSeqBuilder :
     def minor(self,root,cs,ts) :
         return self.chordseq(Scale.minor(root), root, cs, ts)
 
-
+    @classmethod
+    def raw_chordseq(cls,cs,ts) :
+        if len(cs) != len(ts) :
+            raise GoldenPondException("Chord list and time list different lengths")
+        i = 0
+        flag = True
+        events = []
+        while flag :
+            if i >= len(cs) :
+                return EventSeq(events)
+            data = cs[i]
+            duration = ts[i]
+            events.append(Event(data,duration))
+            i=i+1
+        
 
 class FoxBuilder :
     def __init__(self, root) :
@@ -695,9 +709,74 @@ class Music :
         return ScaleChooseSequence(self.mode_scale, 1, self.duration())
 
 
-class Mode :
-    def __init__(self, names) :
-        self.names = set(names)
 
-    def all_names(self) :
-        return self.names    
+class Mode :
+    mode_names = {tuple([2,2,1,2,2,2,1]) : ["ionian","major"],
+                 tuple([2,1,2,2,2,1,2]) : ["dorian"],
+                 tuple([1,2,2,2,1,2,2]) : ["phrygian"],
+                 tuple([2,2,2,1,2,2,1]) : ["lydian"],
+                 tuple([2,2,1,2,2,1,2]) : ["mixolydian"],
+                 tuple([2,1,2,2,1,2,2]) : ["aeolian", "natural minor"],
+                 tuple([1,2,2,1,2,2,2]) : ["locrian"] }
+ 
+    mode_types = {tuple([2,2,1,2,2,2,1]) : "major",
+                 tuple([2,1,2,2,2,1,2]) : "minor",
+                 tuple([1,2,2,2,1,2,2]) : "minor",
+                 tuple([2,2,2,1,2,2,1]) : "major",
+                 tuple([2,2,1,2,2,1,2]) : "major",
+                 tuple([2,1,2,2,1,2,2]) : "minor",
+                 tuple([1,2,2,1,2,2,2]) : "diminished" }
+
+
+    def __init__(self, root, note_bag) :
+        self.root = root
+        self.notes = note_bag
+
+    @classmethod
+    def all_names(cls) :
+        return mode_names
+
+    @classmethod
+    def start(cls,note) :
+        """ This creates a new Mode object in ionian. Starting at note"""        
+        return Mode(note, Scale.major(note).get_notes())
+
+    @classmethod
+    def make(cls,note,mode_off) :
+        return Mode.start(note).remode(mode_off)
+
+    def to_scale(self) :
+        return Scale(self.notes)
+
+    def raw_notes(self) :
+        return self.to_scale().raw_notes()
+
+    def diffs(self) :
+        ds = []
+        raws = self.notes.raw_notes()[:]
+        raws.append(raws[0]+12)
+        i = 0
+        for x in range(len(raws)-1) :
+            ds.append(raws[i+1]-raws[i])
+            i = i + 1
+        return ds
+
+    def remode(self,n) :
+        diffs = []
+        i = n
+        for x in range(7) :
+            diffs.append(self.diffs()[i%7])
+            i=i+1
+        new_note = self.root
+        new_notes = [self.root]
+        for d in diffs :
+            new_note = new_note+d
+            new_notes.append(new_note)
+        new_notes = new_notes[:-1]
+        return Mode(self.root, NoteBag(new_notes))
+
+    def names(self) : 
+        return Mode.mode_names[tuple(self.diffs())]
+
+    def type(self) :
+        return Mode.mode_types[tuple(self.diffs())]
