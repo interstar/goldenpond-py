@@ -31,6 +31,7 @@ ln -s ../goldenpond goldenpond
 
 python3 midi.py
 
+
 ```
 
 Then open example1.mid in your favourite MIDI file player.
