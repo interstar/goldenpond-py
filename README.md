@@ -1,6 +1,7 @@
+## NOTE: This project and library is now deprecated
+SEE https://github.com/interstar/golden-pond for the later work on this project. The code there has been rewritten from scratch. Soon we hope to reach parity with this project in the sense that the new GoldenPond library will be compatible with FoxDot, among other frameworks and contexts.
 
-## GoldenPond : Music generation in Python
-    
+### GoldenPond : Music generation in Python
 
 GoldenPond is a Python library for representing music.
 
